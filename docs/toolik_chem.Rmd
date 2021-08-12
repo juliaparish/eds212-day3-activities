@@ -1,0 +1,69 @@
+---
+title: "toolik_chem.Rmd"
+author: "Julia Parish"
+date: "8/11/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(tidyverse)
+library(here)
+library(janitor)
+
+```
+# Read in the data as toolik_biochem. Remember, you’ll want to specify here how NA values are stored. Pipe directly into janitor::clean_names() following your import code to get all column names into lower snake case.
+
+```{r}
+toolik_biochem <- read_csv(here::here("data", "toolik_biochem.csv"), na = ".")
+toolik_biochem
+
+toolik_biochem <- toolik_biochem %>% clean_names()
+
+```
+
+# Create a subset of the data that contains only observations from the “Toolik Inlet” site, and that only contains the variables (columns) for pH, dissolved organic carbon (DOC), and total dissolved nitrogen (TDN) (hint: see dplyr::select()). Store this subset as inlet_biochem. Make sure to LOOK AT the subset you’ve created.
+
+# obs_toolik_inlet <- toolik_biochem %>% 
+  filter(site == "Toolik inlet") - only shows two rows of data
+
+```{r}
+inlet_biochem <- toolik_biochem %>% 
+  filter(site %in% c("Toolik inlet", "Toolik Inlet")) %>% 
+  select(p_h, doc_u_m, tdn_u_m)
+
+inlet_biochem
+
+```
+# Find the mean value of each column 3 different ways:
+- Write a for loop by hand to calculate the mean for each
+- Use the apply() function to find the mean
+- Use the purrr::map_df() function to find the mean of each
+
+```{r}
+mean_inlet_biochem <- vector(mode = "numeric", length = ncol(inlet_biochem))
+
+for (i in 1:ncol(inlet_biochem)) {
+  mean_val <- mean(inlet_biochem[[i]], na.rm = TRUE)
+  mean_inlet_biochem[i] <- mean_val
+
+# OR 
+  
+for (i in seq_along(inlet_biochem)) {
+  mean_inlet_biochem[i] <- mean(inlet_biochem[[i]], na.rm = TRUE)
+} 
+  
+mean_inlet_biochem
+
+# Apply 
+
+apply(X = inlet_biochem, 2, mean, na.rm = TRUE)
+
+# Purrrr
+
+map_df(.x = inlet_biochem, .f = mean, na.rm = TRUE)
+
+
+```
+ 
